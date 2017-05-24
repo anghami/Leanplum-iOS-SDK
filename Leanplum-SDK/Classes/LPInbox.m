@@ -301,7 +301,7 @@ static NSObject *updatingLock;
             
             // Download images.
             BOOL willDownloadImages = NO;
-            for (LPInboxMessage *message in messages) {
+            for (LPInboxMessage *message in messages.allValues) {
                 willDownloadImages |= [message downloadImageIfPrefetchingEnabled];
             }
 
