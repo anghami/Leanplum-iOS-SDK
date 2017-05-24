@@ -22,7 +22,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class Leanplum_WebSocket;
+@class SRWebSocket;
 @class Leanplum_SocketIO;
 @class Leanplum_SocketIOPacket;
 @class Leanplum_MKNetworkOperation;
@@ -50,7 +50,7 @@
     
     id<Leanplum_SocketIODelegate> _delegate;
     
-    Leanplum_WebSocket *_webSocket;
+    SRWebSocket *_webSocket;
     
     BOOL _isConnected;
     BOOL _isConnecting;

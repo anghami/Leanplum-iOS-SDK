@@ -24,7 +24,7 @@
 #import "Constants.h"
 
 #import "LPNetworkProtocol.h"
-#import "Leanplum_WebSocket.h"
+#import "SRWebSocket.h"
 
 #import "LPJSON.h"
 
@@ -36,7 +36,7 @@
 # pragma mark -
 # pragma mark SocketIO's private interface
 
-@interface Leanplum_SocketIO (FP_Private) <Leanplum_WebSocketDelegate>
+@interface Leanplum_SocketIO (FP_Private) <SRWebSocketDelegate>
 
 - (void) log:(NSString *)message;
 
@@ -89,7 +89,7 @@
 
         _host = host;
         _port = port;
-        //_useTLS  = useTLS;
+        _useTLS  = useTLS;
 
         // do handshake via HTTP/HTTPS request
         NSString *s = [NSString stringWithFormat:HANDSHAKE_URL, useTLS ? @"s" : @"", _host, (int) _port, rand()];
@@ -182,11 +182,11 @@
 
 - (void) openSocket
 {
-    NSString *url = [NSString stringWithFormat:SOCKET_URL, _useTLS ? @"s" : @"", _host, (int) (_port == 443 ? 80 : _port), _sid];
+    NSString *url = [NSString stringWithFormat:SOCKET_URL, _useTLS ? @"s" : @"", _host, (int)_port, _sid];
 
     _webSocket = nil;
-
-    _webSocket = [[Leanplum_WebSocket alloc] initWithURLString:url delegate:self];
+    _webSocket = [[SRWebSocket alloc] initWithURL:[NSURL URLWithString:url]];
+    _webSocket.delegate = self;
     [self log:[NSString stringWithFormat:@"Opening %@", url]];
     [_webSocket open];
 }
@@ -571,24 +571,24 @@
 # pragma mark -
 # pragma mark WebSocket Delegate Methods
 
-- (void) webSocketDidClose:(Leanplum_WebSocket*)webSocket
+- (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(nullable NSString *)reason wasClean:(BOOL)wasClean
 {
-    [self log:[NSString stringWithFormat:@"Connection closed."]];
+    [self log:[NSString stringWithFormat:@"Connection closed. code: %@. Reason: %@. clean: %@", @(code), reason, @(wasClean)]];
     [self onDisconnect];
 }
 
-- (void) webSocketDidOpen:(Leanplum_WebSocket *)ws
+- (void)webSocketDidOpen:(SRWebSocket *)webSocket;
 {
     [self log:[NSString stringWithFormat:@"Connection opened."]];
     [self onConnect];
 }
 
-- (void) webSocket:(Leanplum_WebSocket *)ws didFailWithError:(NSError *)error
+- (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error
 {
     NSLog(@"Leanplum: ERROR: Connection failed with error ... %@", [error localizedDescription]);
 }
 
-- (void) webSocket:(Leanplum_WebSocket *)ws didReceiveMessage:(NSString*)message
+- (void)webSocket:(SRWebSocket *)webSocket didReceiveMessageWithString:(nonnull NSString *)message
 {
     [self onData:message];
 }
